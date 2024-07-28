@@ -18,6 +18,7 @@ export default defineConfig({
       'Plugins': path.resolve(__dirname, 'src/plugins'),
       'Views': path.resolve(__dirname, 'src/views'),
       'JS': path.resolve(__dirname, 'src/js'),
+      'Components': path.resolve(__dirname, 'src/components'),
     }
   }
 })

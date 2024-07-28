@@ -19,3 +19,7 @@ export async function UpdateContactDetail(id, jsonDataRequest) {
 export async function DeleteContactDetail(id) {
     return await axios.delete('/contacts/'+ id)
 }
+
+export async function PostContactList(jsonDataRequest) {
+    return await axios.post('/contactList', jsonDataRequest)
+}

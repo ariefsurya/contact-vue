@@ -20,7 +20,18 @@
                     <option :value="i.id" v-for="i in allGroupList" v-bind:key="i.id">{{ i.name }}</option>
                 </select>
             </div>
-            <div class="w-25 text-right">
+            <div class="w-33 text-right d-flex justify-content-between">
+              <v-btn 
+                prepend-icon="mdi-upload"
+                color="primary"
+                class="mt-0 mb-0 ms-4 br-5px" 
+                depressed
+                @click="dialogUploadContact = true">
+                  <template v-slot:prepend>
+                    <v-icon color="white"></v-icon>
+                  </template>
+                  Upload Contact
+              </v-btn>
               <v-btn 
                 prepend-icon="mdi-plus"
                 color="success"
@@ -45,6 +56,7 @@
               :items-per-page="jsonDataParam.iTake"
               @update:options="loadItems"
               class="elevation-1"
+              :disable-sort="true"
             >
               <template v-slot:loading>
                 <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
@@ -84,7 +96,6 @@
                   </td>
                 </tr>
               </template>
-            <!-- </v-data-table> -->
             </v-data-table-server>
         </div>
 
@@ -181,6 +192,8 @@
       </v-layout>
     </div>
     
+
+    <DialogUploadContact v-model:propsDialogUploadContact="dialogUploadContact" @emitCloseDialogUpload="onCloseDialogUploadContact"></DialogUploadContact>
   </div>
 </template>
 
@@ -190,8 +203,12 @@ import { GetContactList, DeleteContactDetail } from 'Api/ContactService'
 import { GetGroupList } from 'Api/GroupService'
 import helper from 'JS/helper'
 import Swal from 'sweetalert2'
+import DialogUploadContact from 'Components/Dialog/DialogUploadContact.vue'
 
 export default {
+  components: {
+    DialogUploadContact
+  },
   data: () => ({
     helper,
     loading: false,
@@ -211,7 +228,8 @@ export default {
     allContactList: [],
     allGroupList: [],
     maxPage: 1,
-    total_items: 10
+    total_items: 10,
+    dialogUploadContact: false,
   }),
   computed: {
     ...mapGetters([
@@ -239,7 +257,6 @@ export default {
   methods: {
     ...mapActions(['setAllContactGroup']),
     loadItems ({ page, itemsPerPage, sortBy }) {
-      console.log("loadItems")
       this.jsonDataParam.iPage = page
       this.jsonDataParam.iTake = itemsPerPage
       this.apiGetContactList(true)
@@ -252,14 +269,8 @@ export default {
       await GetContactList(this.jsonDataParam.search, this.jsonDataParam.groupid, this.jsonDataParam.iPage, this.jsonDataParam.iTake)
         .then(response => {
           this.loading = false
-          console.log(response)
           this.allContactList.push(...response.data.data.data);
           this.allContactList = this.allContactList.map(obj => ({ ...obj, menu: false }));
-          // this.allContactList = response.data.data.data
-          // this.totalItems = response.data.data.total;
-          // if (this.allContactList.length >= this.totalItems) {
-          //   this.$refs.infiniteLoading.$emit('$InfiniteLoading:complete');
-          // }
           this.maxPage = response.data.data.last_page
           this.total_items = response.data.data.total
         })
@@ -301,7 +312,6 @@ export default {
     async apiGetGroupList() {
       await GetGroupList()
         .then(response => {
-          console.log(response)
           this.allGroupList = response.data.data
           this.setAllContactGroup(this.allGroupList)
         })
@@ -310,7 +320,6 @@ export default {
         })
     },
     async loadMore({ side, done }) {
-      console.log("loadMore")
       setTimeout(() => {
         if (this.isCanLoadMore && side === 'end') {
           this.jsonDataParam.iPage++
@@ -318,6 +327,13 @@ export default {
         }
         done('ok')
       }, 1000)
+    },
+    onCloseDialogUploadContact(refresh){
+      this.dialogUploadContact = false
+      if (refresh){
+        this.apiGetContactList(true)
+        this.apiGetGroupList()
+      }
     },
   }
 }
