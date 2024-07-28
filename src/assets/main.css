@@ -1,0 +1,182 @@
+@import './base.css';
+@import 'vuetify/styles';
+
+#app {
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+.header {
+  min-height: 64px
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+.show-on-mobile {
+  display: none;
+}
+
+.fw-semi-bold {
+  font-weight: 400;
+}
+
+.form-basic-rad, .form-basic-rad .v-label {
+  height: 40px;
+  text-indent: 8px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.form-basic-rad .v-label {
+  font-size: 14px;
+}
+
+.form-basic-rad {
+  border: 1px solid #E5E5E5;
+  width: 100%;
+}
+
+.form-basic-rad .v-input__control {
+  min-height: unset !important;
+}
+
+.form-basic-rad .v-input__slot {
+  padding: 0 !important;
+}
+
+.form-basic-rad .v-input__prepend-outer {
+  margin: 0 !important;
+}
+
+.form-basic-rad.select-form {
+  -webkit-appearance: menulist;
+}
+
+.br-5px-left {
+  border-radius: 5px 0px 0px 5px !important;
+}
+.br-5px-right {
+  border-radius: 0px 5px 5px 0px !important;
+}
+.btn-search-new {
+  background-color: #DFDFDF;
+  color: #797979;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+}
+
+.btn-search-new i {
+  font-size: 18px;
+}
+
+.v-input__details {
+  min-height: 0px !important;
+  padding-top: 1px !important;
+  padding-bottom: 10px;
+}
+
+thead {
+  background-color: #e0e0e0; /* Darker background color */
+  color: #333; /* White text color for contrast */
+}
+
+.w-40 {
+  width: 40% !important;
+}
+.w-60 {
+  width: 60% !important;
+}
+
+%form-basic-rad {
+  height: 40px;
+  text-indent: 8px;
+  border-radius: 5px;
+  font-size: 14px;
+
+  .v-label {
+    font-size: 14px;
+  }
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (max-width: 767px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .show-on-mobile {
+    display: block !important;
+  }
+  
+  #app {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0rem;
+    padding-top: 2rem;
+    font-weight: normal;
+    padding-right: .25rem !important;
+    padding-inline-end: 4px !important;
+    padding-left: .25rem !important;
+    padding-inline-start: 4px !important;
+    font-size: 1.25rem !important;
+  }
+  .v-application__wrap {
+    min-height: 100% !important;
+  }
+
+  .v-messages__message {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    padding: 0 0rem;
+  }
+}
+
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  position: absolute !important;
+  opacity: 0.7;
+  width: 100% !important;
+}
+
+.text-white{
+  color: white !important;
+}
+
+.v-infinite-scroll__side {
+  display: none !important
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
