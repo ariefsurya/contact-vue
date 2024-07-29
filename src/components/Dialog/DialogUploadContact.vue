@@ -4,7 +4,7 @@
         @click:outside="closeDialog(false)"
     >
     <v-card
-        class="mx-auto w-50"
+        :class="['mx-auto', isMobile ? '' : 'w-50']"
         prepend-icon="mdi-file-account"
         title="Upload Contact"
         width="400"
@@ -33,7 +33,7 @@
                     accept=".json"
                     color="error"
                     ref="fileInputJsonApi"
-                    class="hidden-lg"
+                    class="d-none"
                     @change="readJsonWithApi"
                 ></v-file-input>
 
@@ -44,31 +44,73 @@
                     accept=".xlsx,.xls,.csv"
                     color="error"
                     ref="fileInputExcelApi"
-                    class="hidden-lg"
+                    class="d-none"
                     @change="readExcelWithApi"
                 ></v-file-input>
             </div>
-
-            <div v-if="uploadContacts && uploadContacts.length > 0" class="mt-3">
+            <div v-if="uploadContacts && uploadContacts.length > 0" class="mt-3 hide-on-mobile">
                 <v-data-table :headers="contactHeaders" 
                     :items="uploadContacts"
                     :hide-default-footer="true"
                     style="max-height: 300px; overflow: auto;"
                 >
                     <template v-slot:item="{ item, index }">
-                    <tr>
-                        <td>{{ index+1 }}</td>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.phone_number }}</td>
-                        <td>{{ item.address }}</td>
-                        <td>{{ item.group_name }}</td>
-                    </tr>
+                        <tr>
+                            <td>{{ index+1 }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.phone_number }}</td>
+                            <td>{{ item.address }}
+                            </td>
+                            <td>{{ item.group_name }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" class="h-0">
+                                <div class="small text-red d-flex">
+                                    <i class="small mdi mdi-alert pe-1 text-red" v-if="v$.uploadContacts.$each.$response.$errors[index].name.length > 0">name is required</i>
+                                    <i class="small mdi mdi-alert pe-1 text-red" v-if="v$.uploadContacts.$each.$response.$errors[index].address.length > 0">address is required</i>
+                                    <i class="small mdi mdi-alert pe-1 text-red" v-if="v$.uploadContacts.$each.$response.$errors[index].phone_number.length > 0">phone_number {{ v$.uploadContacts.$each.$response.$errors[index].phone_number[0].$message }}</i>
+                                </div>
+                            </td>
+                        </tr>
                     </template>
                 </v-data-table>
+            </div>
+            <div v-if="uploadContacts && uploadContacts.length > 0" class="mt-3 show-on-mobile">
+                <v-infinite-scroll
+                    mode="manual"
+                    max-height="300">
+                    <template v-for="(item, index) in uploadContacts" :key="index">
+                        <div :class="['px-2 d-flex', index % 2 === 0 ? 'bg-grey-lighten-2' : '']">
+                            <div class="col-1"> {{ index+1 }}</div>
+                            <div class="col-11 d-block"> 
+                                <div class="d-flex justify-content-between align-center">
+                                    <div class="align-center d-flex"><i class="fs-3 mdi mdi-account-circle pe-1"></i>{{ item.name }}</div>
+                                    <div>
+                                        <!-- <i class="fs-2 mdi mdi-account-multiple pe-1"></i> -->
+                                        {{ item.group_name ? ('(' + item.group_name + ')') : "" }}
+                                    </div>
+                                </div>
+                                <div class="align-center d-flex">
+                                    <i class="fs-3 mdi mdi-phone pe-1"></i>{{ item.phone_number }}
+                                </div>
+                                <div class="align-center d-flex">
+                                    <i class="fs-3 mdi mdi-map-marker pe-1"></i>{{ item.address }}
+                                </div>
+
+                                <div class="small text-red d-flex">
+                                    <i class="small mdi mdi-alert pe-1 text-red" v-if="v$.uploadContacts.$each.$response.$errors[index].name.length > 0">name is required</i>
+                                    <i class="small mdi mdi-alert pe-1 text-red" v-if="v$.uploadContacts.$each.$response.$errors[index].address.length > 0">address is required</i>
+                                    <i class="small mdi mdi-alert pe-1 text-red" v-if="v$.uploadContacts.$each.$response.$errors[index].phone_number.length > 0">phone_number {{ v$.uploadContacts.$each.$response.$errors[index].phone_number[0].$message }}</i>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </v-infinite-scroll>
             </div>
             
             <v-card-actions class="mt-2 justify-content-end" v-if="uploadContacts && uploadContacts.length > 0">
                 <v-btn
+                    :disabled="loading"
                     color="success"
                     text="Submit"
                     variant="outlined"
@@ -84,6 +126,8 @@
 import { PostContactList } from 'Api/ContactService'
 import { PostUploadJson, PostUploadExcel } from 'Api/UploadService'
 import Swal from 'sweetalert2'
+import { useVuelidate } from '@vuelidate/core'
+import { helpers, required, minLength, maxLength } from '@vuelidate/validators'
 
 export default {
     props: {
@@ -102,8 +146,23 @@ export default {
             { title: 'Address', key: 'address' },
             { title: 'Group', key: 'group_name' },
         ],
-        uploadContacts: null
+        uploadContacts: [],
     }),
+    validations() {
+        return {
+            uploadContacts: {
+                $each: helpers.forEach({
+                    name: { required },
+                    phone_number: { required, minLength: minLength(8), maxLength: maxLength(13) },
+                    address: { required }
+                })
+            }
+        }
+    },
+    setup() {
+        const v$ = useVuelidate()
+        return { v$ }
+    },
     watch: {
         propsDialogUploadContact (newVal) {
             this.dialogUploadContact = newVal
@@ -192,34 +251,41 @@ export default {
                     document.getElementById('uploadExcel').value = ''
                 })
         },
-        apiPostContactList() {
-            this.loading = true
-            PostContactList(this.uploadContacts)
-                .then((response) => {
-                    this.loading = false
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: "Contact has been saved",
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then((result) => {
-                        this.closeDialog(true)
+        async apiPostContactList() {
+            const isFormCorrect = await this.v$.$validate()
+            if (isFormCorrect) {
+                this.loading = true
+                PostContactList(this.uploadContacts)
+                    .then((response) => {
+                        this.loading = false
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: "Contact has been saved",
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then((result) => {
+                            this.closeDialog(true)
+                        })
                     })
-                })
-                .catch((error) => {
-                    this.loading = false
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: error.response.data.message,
-                        showConfirmButton: false,
-                        timer: 1500
+                    .catch((error) => {
+                        this.loading = false
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: error.response.data.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
                     })
-                })
+            }
         },
         closeDialog(refresh) {
             this.$emit('emitCloseDialogUpload', refresh)
+        },
+        getError(index, field) {
+            const errors = this.v$.uploadContacts.$each[index]?.$errors || {};
+            return errors[field]?.[0] || '';
         },
     }
 }

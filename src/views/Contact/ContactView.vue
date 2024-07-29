@@ -103,7 +103,20 @@
     </div>
 
     <div class="show-on-mobile pt-4">
-      <v-toolbar-title>Contact List</v-toolbar-title>
+      <v-toolbar-title>
+        <b>Contact List</b>
+        <v-btn 
+          prepend-icon="mdi-upload"
+          color="primary"
+          class="mt-2 mb-2 ms-2 br-5px" 
+          depressed
+          @click="dialogUploadContact = true">
+            <template v-slot:prepend>
+              <v-icon color="white"></v-icon>
+            </template>
+            Upload Contact
+        </v-btn>
+      </v-toolbar-title>
       <v-layout class="d-block">
         <div class="pa-2">
             <div class="d-flex">
@@ -128,7 +141,7 @@
         <div class="pa-2 pt-0">
           <v-infinite-scroll
             @load="loadMore"
-            :style="infiniteScrollStyle"
+            style="height: calc(100vh - 200px); overflow: auto;"
           >
             <template v-for="(item, index) in allContactList" :key="index">
               <v-menu

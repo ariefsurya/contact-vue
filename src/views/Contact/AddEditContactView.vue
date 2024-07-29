@@ -4,7 +4,6 @@
     
     <div v-if="loading" class="spinner-container">
       <v-progress-circular indeterminate :size="50" :width="6"></v-progress-circular>
-      <!-- <div class="spinner"></div> -->
     </div>
     <v-form ref="form" @submit.prevent="submitForm" class="hide-on-mobile">
       <div class="d-flex">
@@ -137,8 +136,8 @@
       </div>
 
       <div class="text-right pt-4">
-        <v-btn type="button" color="danger" class="text-white" @click="$router.go(-1)">Cancel</v-btn>
-        <v-btn type="submit" color="primary" class="ms-10" @click="v$.$validate">Save</v-btn>
+        <v-btn :disabled="loading" type="button" color="danger" class="text-white" @click="$router.go(-1)">Cancel</v-btn>
+        <v-btn :disabled="loading" type="submit" color="primary" class="ms-10" @click="v$.$validate">Save</v-btn>
       </div>
     </v-form>
   </v-layout>
